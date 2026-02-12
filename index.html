@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Simple Todo App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+    <h2>My Todo List</h2>
+    <div class="input-group">
+        <input type="text" id="todoInput" placeholder="New task...">
+        <button onclick="addTask()">Add</button>
+    </div>
+    
+    <h4>Active Tasks</h4>
+    <ul id="todoList"></ul>
+
+    <hr>
+    <h4>History (Completed)</h4>
+    <ul id="historyList"></ul>
+</div>
+    <script src="script.js"></script>
+</body>
+</html>

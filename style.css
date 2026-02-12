@@ -1,0 +1,23 @@
+body { font-family: Arial, sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; padding: 50px; }
+.container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 350px; }
+.input-group { display: flex; gap: 10px; }
+input { flex: 1; padding: 8px; }
+button { padding: 8px; cursor: pointer; background: #28a745; color: white; border: none; }
+ul { list-style: none; padding: 0; margin-top: 20px; }
+li { background: #eee; margin-bottom: 5px; padding: 10px; display: flex; justify-content: space-between; }
+.delete-btn { color: red; cursor: pointer; font-weight: bold; }
+.completed {
+    text-decoration: line-through;
+    color: #888;
+}
+li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+input[type="checkbox"] {
+    cursor: pointer;
+    transform: scale(1.2);
+}
