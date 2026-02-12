@@ -8,10 +8,11 @@ app.use(express.json()); // JSON data ni handle cheyadaniki
 
 // MySQL Connection Setup
 const db = mysql.createConnection({
-    host: 'localhost',
+    host: 'mysql.railway.internal',
     user: 'root',      // Nee MySQL username (usually root)
-    password: 'lemon1010', // Nee MySQL password ikkada ivvu
-    database: 'todo_db'
+    password: 'XfTKFMFQoLkvSZKHzUbSGpiBhCIHyjXe', // Nee MySQL password ikkada ivvu
+    database: 'railway',
+    port:'3306'
 });
 
 db.connect((err) => {
