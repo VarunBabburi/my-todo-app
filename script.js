@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000";
+const API_URL = "https://todo-backend-varun.onrender.com";
 
 // Page load avvagane tasks load cheyali
 window.onload = getTasks;
