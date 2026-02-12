@@ -4,40 +4,53 @@ const API_URL = "https://todo-backend-varun.onrender.com";
 window.onload = getTasks;
 
 async function getTasks() {
-    const res = await fetch(`${API_URL}/get-tasks`);
-    const tasks = await res.json();
-    
-    const todoList = document.getElementById('todoList');
-    const historyList = document.getElementById('historyList');
-    
-    todoList.innerHTML = '';
-    historyList.innerHTML = '';
-
-    tasks.forEach(task => {
-        const li = document.createElement('li');
-        const isCompleted = task.status === 'completed';
-
-        // Checkbox logic
-        li.innerHTML = `
-            <div style="display:flex; align-items:center; gap:10px;">
-                <input type="checkbox" ${isCompleted ? 'checked' : ''} 
-                    onclick="toggleComplete(${task.id}, '${task.status}')">
-                <span style="${isCompleted ? 'text-decoration: line-through; color: gray;' : ''}">${task.task_name}</span>
-            </div>
-            <div>
-                <small style="font-size:10px; color:gray;">
-                    ${task.completed_at ? new Date(task.completed_at).toLocaleString() : ''}
-                </small>
-                <span class="delete-btn" onclick="deleteTask(${task.id})" style="cursor:pointer; color:red; margin-left:10px;"> X</span>
-            </div>
-        `;
-
-        if (isCompleted) {
-            historyList.appendChild(li);
-        } else {
-            todoList.appendChild(li);
+    try {
+        const res = await fetch(`${API_URL}/get-tasks`);
+        const tasks = await res.json();
+        
+        // 1. Nee HTML lo ee IDs pakka undali mama
+        const todoList = document.getElementById('todoList');
+        const historyList = document.getElementById('historyList');
+        
+        if (!todoList || !historyList) {
+            console.error("HTML lo todoList leda historyList IDs levu mama!");
+            return;
         }
-    });
+
+        todoList.innerHTML = '';
+        historyList.innerHTML = '';
+
+        tasks.forEach(task => {
+            const li = document.createElement('li');
+            // Backend nundi 'status' ane peru tho data ostundi
+            const isCompleted = task.status === 'completed';
+
+            li.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="checkbox" ${isCompleted ? 'checked' : ''} 
+                        onclick="toggleComplete(${task.id}, '${task.status}')">
+                    <span style="${isCompleted ? 'text-decoration: line-through; color: gray;' : ''}">
+                        ${task.task_name} 
+                    </span>
+                </div>
+                <div>
+                    <small style="font-size:10px; color:gray;">
+                        ${task.completed_at ? new Date(task.completed_at).toLocaleString() : ''}
+                    </small>
+                    <span class="delete-btn" onclick="deleteTask(${task.id})" style="cursor:pointer; color:red; margin-left:10px;"> X</span>
+                </div>
+            `;
+
+            // 2. Status batti list loki pampali
+            if (isCompleted) {
+                historyList.appendChild(li);
+            } else {
+                todoList.appendChild(li);
+            }
+        });
+    } catch (err) {
+        console.error("Tasks load avvatledhu:", err);
+    }
 }
 
 async function toggleComplete(id, currentStatus) {
