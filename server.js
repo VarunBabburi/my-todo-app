@@ -3,7 +3,11 @@ const mysql = require('mysql2');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: '*', // Evvaraina access cheyochu ani permission
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type']
+}));
 app.use(express.json()); // JSON data ni handle cheyadaniki
 
 // MySQL Connection Setup
