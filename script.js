@@ -30,8 +30,8 @@ async function getTasks() {
                     <input type="checkbox" ${isCompleted ? 'checked' : ''} 
                         onclick="toggleComplete(${task.id}, '${task.status}')">
                     <span style="${isCompleted ? 'text-decoration: line-through; color: gray;' : ''}">
-                        ${task.task_name} 
-                    </span>
+    ${task.task_name || task.task || "Unnamed Task"} 
+</span>
                 </div>
                 <div>
                     <small style="font-size:10px; color:gray;">
