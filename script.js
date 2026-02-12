@@ -22,13 +22,13 @@ async function getTasks() {
             <div style="display:flex; align-items:center; gap:10px;">
                 <input type="checkbox" ${isCompleted ? 'checked' : ''} 
                     onclick="toggleComplete(${task.id}, '${task.status}')">
-                <span class="${isCompleted ? 'completed' : ''}">${task.task_name}</span>
+                <span style="${isCompleted ? 'text-decoration: line-through; color: gray;' : ''}">${task.task_name}</span>
             </div>
             <div>
                 <small style="font-size:10px; color:gray;">
                     ${task.completed_at ? new Date(task.completed_at).toLocaleString() : ''}
                 </small>
-                <span class="delete-btn" onclick="deleteTask(${task.id})"> X</span>
+                <span class="delete-btn" onclick="deleteTask(${task.id})" style="cursor:pointer; color:red; margin-left:10px;"> X</span>
             </div>
         `;
 
@@ -52,14 +52,14 @@ async function toggleComplete(id, currentStatus) {
 }
 // Patha line: const isDone = task.status === 'completed' ? 'style="..."' : '';
 // Kotha line (Class based):
-const completedClass = task.status === 'completed' ? 'class="completed"' : '';
+// const completedClass = task.status === 'completed' ? 'class="completed"' : '';
 
-li.innerHTML = `
-    <span ${completedClass} onclick="toggleComplete(${task.id}, '${task.status}')" style="cursor:pointer">
-        ${task.task_name}
-    </span>
-    <span class="delete-btn" onclick="deleteTask(${task.id})">X</span>
-`;
+// li.innerHTML = `
+//     <span ${completedClass} onclick="toggleComplete(${task.id}, '${task.status}')" style="cursor:pointer">
+//         ${task.task_name}
+//     </span>
+//     <span class="delete-btn" onclick="deleteTask(${task.id})">X</span>
+// `;
 
 async function addTask() {
     const input = document.getElementById('todoInput');

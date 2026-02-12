@@ -24,9 +24,9 @@ db.connect((err) => {
 });
 
 // Basic Route (Check cheyadaniki)
-app.get('/', (req, res) => {
-    res.send('Server ready ga undi mama!');
-});
+// app.get('/', (req, res) => {
+//     res.send('Server ready ga undi mama!');
+// });
 // 1. Database nundi tasks anni techukovadaniki (READ)
 app.get('/get-tasks', (req, res) => {
     const sql = "SELECT * FROM tasks";
@@ -74,7 +74,7 @@ app.delete('/delete-task/:id', (req, res) => {
 });
 
 // Port listen
-const PORT = 5000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+const PORT = process.env.PORT || 5000; // Ee line marchu
+app.listen(PORT, '0.0.0.0', () => { // '0.0.0.0' pettadam valla external connection open avthundi
+    console.log(`Server running on port ${PORT}`);
 });
