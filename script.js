@@ -67,14 +67,23 @@ async function addTask() {
 
     if (!taskText) return;
 
-    await fetch(`${API_URL}/add-task`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task: taskText })
-    });
+    try {
+        const response = await fetch(`${API_URL}/add-task`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ task: taskText }) // Backend lo 'task' ani catch chestunnam
+        });
 
-    input.value = '';
-    getTasks(); // Refresh list
+        if (response.ok) {
+            input.value = '';
+            getTasks(); // List refresh cheyadaniki
+        } else {
+            console.error("Server error:", await response.text());
+        }
+    } catch (err) {
+        console.error("Network error:", err);
+        alert("Server connect avvaledu mama!");
+    }
 }
 
 async function deleteTask(id) {
