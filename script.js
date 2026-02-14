@@ -58,31 +58,35 @@ function showApp() {
 // 3. Get Tasks (UserId pampali ikkada)
 // 1. Add Task (Reset fix tho)
 async function addTask() {
-    const taskBox = document.getElementById("taskInput");
-    const reminderBox = document.getElementById("reminderInput");
-    
-    if (!taskBox.value) return alert("Task enter chey mama!");
+    // 1. Correct IDs tho variables tisukundham
+    const tBox = document.getElementById("taskInput");
+    const rBox = document.getElementById("reminderInput");
+
+    if (!tBox.value) return alert("Task raye mama!");
 
     try {
+        // 2. Data pampiddam
         await fetch(`${API_URL}/add-task`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-                task: taskBox.value, 
+                task: tBox.value, 
                 userId: currentUserId, 
-                reminderTime: reminderBox.value || null 
+                reminderTime: rBox.value || null 
             })
         });
 
-        // ✅ ID lu correct ga unna variables tho reset cheyali
-        taskBox.value = ""; 
-        reminderBox.value = ""; 
-        reminderBox.defaultValue = ""; 
-        reminderBox.blur(); 
+        // 3. RESET LOGIC (Idi ippudu pakka pani chestundi)
+        tBox.value = ""; // Task box empty
+        rBox.value = ""; // Date box empty
+        
+        // Extra force reset for mobile browsers
+        rBox.type = "text"; 
+        rBox.type = "datetime-local"; 
 
         getTasks();
     } catch (err) {
-        console.error("Task add chesetappudu error vachindi:", err);
+        console.error("Error:", err);
     }
 }
 
@@ -137,4 +141,42 @@ async function deleteTask(id) {
 function logout() {
     localStorage.clear();
     location.reload();
+}
+// Prathi minute check chesthu untundi
+setInterval(() => {
+    checkAlarms();
+}, 60000);
+
+async function checkAlarms() {
+    if (!currentUserId) return;
+
+    const res = await fetch(`${API_URL}/get-tasks/${currentUserId}`);
+    const tasks = await res.json();
+    
+    const now = new Date();
+    // Browser time format ki match chestunnam (YYYY-MM-DDTHH:MM)
+    const nowStr = now.getFullYear() + "-" + 
+                   String(now.getMonth() + 1).padStart(2, '0') + "-" + 
+                   String(now.getDate()).padStart(2, '0') + "T" + 
+                   String(now.getHours()).padStart(2, '0') + ":" + 
+                   String(now.getMinutes()).padStart(2, '0');
+
+    tasks.forEach(t => {
+        if (t.status === 'pending' && t.reminder_time) {
+            // Database time ni format cheyadam
+            const taskTime = t.reminder_time.substring(0, 16).replace(' ', 'T');
+            
+            if (taskTime === nowStr) {
+                // Real Notification!
+                if (Notification.permission === "granted") {
+                    new Notification("Todo Task! 🔔", {
+                        body: `Mama, Time ayyindi: ${t.task_name}`,
+                        icon: "https://cdn-icons-png.flaticon.com/512/906/906334.png"
+                    });
+                } else {
+                    alert("ALARM: " + t.task_name); // Permission lekpothe alert ostundi
+                }
+            }
+        }
+    });
 }
