@@ -2,14 +2,18 @@ const API_URL = "https://todo-backend-varun.onrender.com";
 let currentUserId = localStorage.getItem("userId");
 let currentUserName = localStorage.getItem("userName");
 
-// App open avvagane login status check cheyali
+// 1. App open avvagane check cheyadam
 window.onload = () => {
     if (currentUserId) {
         showApp();
     }
+    // Notifications Permission adagadam - idi unteనే mobile lo alarm ostundi
+    if (Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
 };
 
-// 1. Signup Logic
+// 2. Signup Logic
 async function signup() {
     const u = document.getElementById("username").value;
     const p = document.getElementById("password").value;
@@ -24,7 +28,7 @@ async function signup() {
     alert(data.message || data.error);
 }
 
-// 2. Login Logic
+// 3. Login Logic
 async function login() {
     const u = document.getElementById("username").value;
     const p = document.getElementById("password").value;
@@ -47,7 +51,7 @@ async function login() {
     }
 }
 
-// UI ni marchadam
+// 4. UI Layout marchadam
 function showApp() {
     document.getElementById("auth-section").style.display = "none";
     document.getElementById("app-section").style.display = "block";
@@ -55,41 +59,35 @@ function showApp() {
     getTasks();
 }
 
-// 3. Get Tasks (UserId pampali ikkada)
-// 1. Add Task (Reset fix tho)
+// 5. Add Task (Reset Fix ikkada undi)
 async function addTask() {
-    // Direct ga element select chesi values teeskundham
+
     const taskInput = document.querySelector("#taskInput");
     const reminderInput = document.querySelector("#reminderInput");
     
-    const taskValue = taskInput.value;
-    const reminderValue = reminderInput.value;
-
-    if (!taskValue) return alert("Task enter chey mama!");
+    if (!taskInput.value) return alert("Task enter chey mama!");
 
     try {
         const response = await fetch(`${API_URL}/add-task`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-                task: taskValue, 
+                task: taskInput.value, 
                 userId: currentUserId, 
-                reminderTime: reminderValue || null 
+                reminderTime: reminderInput.value || null 
             })
         });
 
         if (response.ok) {
-            // ✅ AGGRESSIVE RESET: Motham values ni null chesi blur cheddam
+            // ✅ RESET FIX: Direct ga value empty chesi, placeholder chupinchadam
             taskInput.value = ""; 
             reminderInput.value = ""; 
             
-            // Mobile browsers kosam force refresh
-            taskInput.defaultValue = "";
-            reminderInput.defaultValue = "";
-            
-            console.log("Reset Success!");
-            // addTask lo response.ok lopala pettu
-new Notification("Task Added!", { body: "Nee task save ayyindi mama!" });
+            // Force reset mobile browsers kosam
+            taskInput.setAttribute('value', '');
+            reminderInput.setAttribute('value', '');
+
+            new Notification("Task Added!", { body: "Nee task save ayyindi mama!" });
             getTasks();
         }
     } catch (err) {
@@ -97,7 +95,7 @@ new Notification("Task Added!", { body: "Nee task save ayyindi mama!" });
     }
 }
 
-// 2. Get Tasks (History filter tho)
+// 6. Tasks List techukovadam (Timezone format fix ikkada)
 async function getTasks() {
     const res = await fetch(`${API_URL}/get-tasks/${currentUserId}`);
     const tasks = await res.json();
@@ -109,13 +107,16 @@ async function getTasks() {
     historyList.innerHTML = "";
     
     tasks.forEach(t => {
+        // Database nundi vachina time lo 'T' ni space ga marchi neat ga chupinchadam
+        const displayTime = t.reminder_time ? t.reminder_time.replace('T', ' ').substring(0, 16) : 'No Time';
+
         const itemHtml = `
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>
                     <strong style="${t.status === 'completed' ? 'text-decoration: line-through; color: gray;' : ''}">
                         ${t.task_name}
                     </strong> 
-                    <br><small class="text-muted">${t.reminder_time ? t.reminder_time.replace('T', ' ').substring(0, 16) : ''}</small>
+                    <br><small class="text-muted">Set for: ${displayTime}</small>
                 </span>
                 <div>
                     ${t.status === 'pending' ? 
@@ -133,13 +134,13 @@ async function getTasks() {
     });
 }
 
-// 3. Complete Task Function
+// 7. Complete & Delete Logic
 async function completeTask(id) {
     await fetch(`${API_URL}/complete-task/${id}`, { method: 'PUT' });
     getTasks();
 }
 
-// 5. Delete Task
+
 async function deleteTask(id) {
     await fetch(`${API_URL}/delete-task/${id}`, { method: 'DELETE' });
     getTasks();
@@ -149,7 +150,8 @@ function logout() {
     localStorage.clear();
     location.reload();
 }
-// Prathi minute check chesthu untundi
+
+// 8. ALARM SYSTEM (Every minute run avthundi)
 setInterval(() => {
     checkAlarms();
 }, 60000);
@@ -160,8 +162,9 @@ async function checkAlarms() {
     const res = await fetch(`${API_URL}/get-tasks/${currentUserId}`);
     const tasks = await res.json();
     
+    // Ikkada 'local' time teeskuntunnam
     const now = new Date();
-    // Browser time format ki match chestunnam (YYYY-MM-DDTHH:MM)
+
     const nowStr = now.getFullYear() + "-" + 
                    String(now.getMonth() + 1).padStart(2, '0') + "-" + 
                    String(now.getDate()).padStart(2, '0') + "T" + 
@@ -170,18 +173,18 @@ async function checkAlarms() {
 
     tasks.forEach(t => {
         if (t.status === 'pending' && t.reminder_time) {
-            // Database time ni format cheyadam
+            // Database time ni system time format (YYYY-MM-DDTHH:MM) ki marchadam
             const taskTime = t.reminder_time.substring(0, 16).replace(' ', 'T');
             
             if (taskTime === nowStr) {
-                // Real Notification!
+                
                 if (Notification.permission === "granted") {
-                    new Notification("Todo Task! 🔔", {
+                    new Notification("Todo Alarm! 🔔", {
                         body: `Mama, Time ayyindi: ${t.task_name}`,
                         icon: "https://cdn-icons-png.flaticon.com/512/906/906334.png"
                     });
                 } else {
-                    alert("ALARM: " + t.task_name); // Permission lekpothe alert ostundi
+                    alert("ALARM: " + t.task_name);
                 }
             }
         }

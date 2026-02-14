@@ -66,9 +66,10 @@ app.get('/get-tasks/:userId', (req, res) => {
 // 4. Add Task with Reminder
 app.post('/add-task', (req, res) => {
     const { task, userId, reminderTime } = req.body;
-    const sql = "INSERT INTO tasks (task_name, user_id, reminder_time) VALUES (?, ?, ?)";
+    // reminderTime ni format chesi save cheddam
+    const sql = "INSERT INTO tasks (task_name, user_id, reminder_time, status) VALUES (?, ?, ?, 'pending')";
     db.query(sql, [task, userId, reminderTime], (err, result) => {
-        if (err) return res.json(err);
+        if (err) return res.status(500).json(err);
         res.json({ message: "Task added!" });
     });
 });
