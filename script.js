@@ -2,18 +2,18 @@ const API_URL = "https://todo-backend-varun.onrender.com";
 let currentUserId = localStorage.getItem("userId");
 let currentUserName = localStorage.getItem("userName");
 
-// 1. App open avvagane check cheyadam
+// 1. App open avvagane initialization
 window.onload = () => {
     if (currentUserId) {
         showApp();
     }
-    // Notifications Permission adagadam - idi unteనే mobile lo alarm ostundi
+    // Mobile notifications permission
     if (Notification.permission !== "granted") {
         Notification.requestPermission();
     }
 };
 
-// 2. Signup Logic
+// 2. Signup & Login (Unna code eh, em marchaledhu)
 async function signup() {
     const u = document.getElementById("username").value;
     const p = document.getElementById("password").value;
@@ -28,18 +28,15 @@ async function signup() {
     alert(data.message || data.error);
 }
 
-// 3. Login Logic
 async function login() {
     const u = document.getElementById("username").value;
     const p = document.getElementById("password").value;
-    
     const res = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: u, password: p })
     });
     const data = await res.json();
-    
     if (data.userId) {
         localStorage.setItem("userId", data.userId);
         localStorage.setItem("userName", data.username);
@@ -51,7 +48,6 @@ async function login() {
     }
 }
 
-// 4. UI Layout marchadam
 function showApp() {
     document.getElementById("auth-section").style.display = "none";
     document.getElementById("app-section").style.display = "block";
@@ -59,9 +55,8 @@ function showApp() {
     getTasks();
 }
 
-// 5. Add Task (Reset Fix ikkada undi)
+// 3. Add Task (Aggressive Reset & Notification Fix)
 async function addTask() {
-
     const taskInput = document.querySelector("#taskInput");
     const reminderInput = document.querySelector("#reminderInput");
     
@@ -79,13 +74,11 @@ async function addTask() {
         });
 
         if (response.ok) {
-            // ✅ RESET FIX: Direct ga value empty chesi, placeholder chupinchadam
+            // ✅ RESET FIX: Input values ni blank chesi force refresh
             taskInput.value = ""; 
             reminderInput.value = ""; 
-            
-            // Force reset mobile browsers kosam
-            taskInput.setAttribute('value', '');
-            reminderInput.setAttribute('value', '');
+            taskInput.blur();
+            reminderInput.blur();
 
             new Notification("Task Added!", { body: "Nee task save ayyindi mama!" });
             getTasks();
@@ -95,7 +88,7 @@ async function addTask() {
     }
 }
 
-// 6. Tasks List techukovadam (Timezone format fix ikkada)
+// 4. Get Tasks (Timezone Display Fix)
 async function getTasks() {
     const res = await fetch(`${API_URL}/get-tasks/${currentUserId}`);
     const tasks = await res.json();
@@ -107,8 +100,12 @@ async function getTasks() {
     historyList.innerHTML = "";
     
     tasks.forEach(t => {
-        // Database nundi vachina time lo 'T' ni space ga marchi neat ga chupinchadam
-        const displayTime = t.reminder_time ? t.reminder_time.replace('T', ' ').substring(0, 16) : 'No Time';
+        // Timezone formatting fix: 
+        // Database time lo 'T' unna lekapoyina, direct ga slice chesthunnam
+        let displayTime = "No Time";
+        if (t.reminder_time) {
+            displayTime = t.reminder_time.replace('T', ' ').substring(0, 16);
+        }
 
         const itemHtml = `
             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -120,7 +117,7 @@ async function getTasks() {
                 </span>
                 <div>
                     ${t.status === 'pending' ? 
-                        `<button class="btn btn-sm btn-outline-success me-2" onclick="completeTask(${t.id})">Done ✅</button>` : ''}
+                        `<button class="btn btn-sm btn-success me-2" onclick="completeTask(${t.id})">Done ✅</button>` : ''}
                     <button class="btn btn-danger btn-sm" onclick="deleteTask(${t.id})">Erase 🗑️</button>
                 </div>
             </li>
@@ -134,12 +131,11 @@ async function getTasks() {
     });
 }
 
-// 7. Complete & Delete Logic
+// 5. Complete & Delete Logic
 async function completeTask(id) {
     await fetch(`${API_URL}/complete-task/${id}`, { method: 'PUT' });
     getTasks();
 }
-
 
 async function deleteTask(id) {
     await fetch(`${API_URL}/delete-task/${id}`, { method: 'DELETE' });
@@ -151,7 +147,7 @@ function logout() {
     location.reload();
 }
 
-// 8. ALARM SYSTEM (Every minute run avthundi)
+// 6. ALARM SYSTEM (60 seconds ki okasari check chesthundhi)
 setInterval(() => {
     checkAlarms();
 }, 60000);
@@ -162,9 +158,8 @@ async function checkAlarms() {
     const res = await fetch(`${API_URL}/get-tasks/${currentUserId}`);
     const tasks = await res.json();
     
-    // Ikkada 'local' time teeskuntunnam
     const now = new Date();
-
+    // System Local Time format (YYYY-MM-DDTHH:MM)
     const nowStr = now.getFullYear() + "-" + 
                    String(now.getMonth() + 1).padStart(2, '0') + "-" + 
                    String(now.getDate()).padStart(2, '0') + "T" + 
@@ -173,11 +168,10 @@ async function checkAlarms() {
 
     tasks.forEach(t => {
         if (t.status === 'pending' && t.reminder_time) {
-            // Database time ni system time format (YYYY-MM-DDTHH:MM) ki marchadam
+            // Match cheyadaniki database string ni format chesthunnam
             const taskTime = t.reminder_time.substring(0, 16).replace(' ', 'T');
             
             if (taskTime === nowStr) {
-                
                 if (Notification.permission === "granted") {
                     new Notification("Todo Alarm! 🔔", {
                         body: `Mama, Time ayyindi: ${t.task_name}`,
