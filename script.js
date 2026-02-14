@@ -155,6 +155,9 @@ setInterval(() => {
     checkAlarms();
 }, 60000);
 
+// 1. Alarm Sound kosam oka variable (Inthaku mundu ekkadaina top lo pettu)
+const alarmSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+
 async function checkAlarms() {
     if (!currentUserId) return;
 
@@ -162,7 +165,7 @@ async function checkAlarms() {
     const tasks = await res.json();
     
     const now = new Date();
-    // System Local Time format (YYYY-MM-DDTHH:MM)
+
     const nowStr = now.getFullYear() + "-" + 
                    String(now.getMonth() + 1).padStart(2, '0') + "-" + 
                    String(now.getDate()).padStart(2, '0') + "T" + 
@@ -171,18 +174,30 @@ async function checkAlarms() {
 
     tasks.forEach(t => {
         if (t.status === 'pending' && t.reminder_time) {
-            // Match cheyadaniki database string ni format chesthunnam
+            
             const taskTime = t.reminder_time.substring(0, 16).replace(' ', 'T');
             
             if (taskTime === nowStr) {
+                // ✅ 1. Sound Play cheyadam
+                alarmSound.play().catch(e => console.log("Sound play avvaledu, click chey mama screen meeda!"));
+
+                // ✅ 2. Top Notification Popup
                 if (Notification.permission === "granted") {
-                    new Notification("Todo Alarm! 🔔", {
+                    const notif = new Notification("Todo Alarm! 🔔", {
                         body: `Mama, Time ayyindi: ${t.task_name}`,
-                        icon: "https://cdn-icons-png.flaticon.com/512/906/906334.png"
+                        icon: "https://cdn-icons-png.flaticon.com/512/906/906334.png",
+                        requireInteraction: true // User close chese daka notification untundi
                     });
-                } else {
-                    alert("ALARM: " + t.task_name);
+
+                    // Notification click chesthe app ki vellela
+                    notif.onclick = () => {
+                        window.focus();
+                        alarmSound.pause(); // Sound aapestundi
+                    };
                 }
+                
+                // Backup Alert (Notification missed aithe idi help avtundi)
+                alert("⏰ ALARM: " + t.task_name);
             }
         }
     });
