@@ -58,35 +58,42 @@ function showApp() {
 // 3. Get Tasks (UserId pampali ikkada)
 // 1. Add Task (Reset fix tho)
 async function addTask() {
-    // 1. Correct IDs tho variables tisukundham
-    const tBox = document.getElementById("taskInput");
-    const rBox = document.getElementById("reminderInput");
+    // Direct ga element select chesi values teeskundham
+    const taskInput = document.querySelector("#taskInput");
+    const reminderInput = document.querySelector("#reminderInput");
+    
+    const taskValue = taskInput.value;
+    const reminderValue = reminderInput.value;
 
-    if (!tBox.value) return alert("Task raye mama!");
+    if (!taskValue) return alert("Task enter chey mama!");
 
     try {
-        // 2. Data pampiddam
-        await fetch(`${API_URL}/add-task`, {
+        const response = await fetch(`${API_URL}/add-task`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-                task: tBox.value, 
+                task: taskValue, 
                 userId: currentUserId, 
-                reminderTime: rBox.value || null 
+                reminderTime: reminderValue || null 
             })
         });
 
-        // 3. RESET LOGIC (Idi ippudu pakka pani chestundi)
-        tBox.value = ""; // Task box empty
-        rBox.value = ""; // Date box empty
-        
-        // Extra force reset for mobile browsers
-        rBox.type = "text"; 
-        rBox.type = "datetime-local"; 
-
-        getTasks();
+        if (response.ok) {
+            // ✅ AGGRESSIVE RESET: Motham values ni null chesi blur cheddam
+            taskInput.value = ""; 
+            reminderInput.value = ""; 
+            
+            // Mobile browsers kosam force refresh
+            taskInput.defaultValue = "";
+            reminderInput.defaultValue = "";
+            
+            console.log("Reset Success!");
+            // addTask lo response.ok lopala pettu
+new Notification("Task Added!", { body: "Nee task save ayyindi mama!" });
+            getTasks();
+        }
     } catch (err) {
-        console.error("Error:", err);
+        console.error("Fetch error:", err);
     }
 }
 
