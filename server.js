@@ -17,7 +17,7 @@ const db = mysql.createConnection({
     password: 'XfTKFMFQoLkvSZKHzUbSGpiBhCIHyjXe', // Nee MySQL password ikkada ivvu
     database: 'railway',
     port:'24969',
-    timezone: '+05:30'
+    timezone: 'local'
 });
 
 db.connect((err) => {
@@ -66,10 +66,11 @@ app.get('/get-tasks/:userId', (req, res) => {
 // 4. Add Task with Reminder
 app.post('/add-task', (req, res) => {
     const { task, userId, reminderTime } = req.body;
-    // reminderTime ni format chesi save cheddam
-    const sql = "INSERT INTO tasks (task_name, user_id, reminder_time, status) VALUES (?, ?, ?, 'pending')";
-    db.query(sql, [task, userId, reminderTime], (err, result) => {
-        if (err) return res.status(500).json(err);
+    // Database ki pampetappudu 'T' ni space ga marchi pampiddam
+    const formattedTime = reminderTime ? reminderTime.replace('T', ' ') : null;
+    const sql = "INSERT INTO tasks (task_name, user_id, reminder_time) VALUES (?, ?, ?)";
+    db.query(sql, [task, userId, formattedTime], (err, result) => {
+        if (err) return res.json(err);
         res.json({ message: "Task added!" });
     });
 });
