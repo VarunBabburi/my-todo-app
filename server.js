@@ -32,41 +32,46 @@ db.connect((err) => {
 //     res.send('Server ready ga undi mama!');
 // });
 // 1. Database nundi tasks anni techukovadaniki (READ)
-app.get('/get-tasks', (req, res) => {
-    const sql = "SELECT * FROM tasks";
-    db.query(sql, (err, results) => {
-        if (err) return res.json(err);
-        return res.json(results);
+// 1. User Registration (Signup)
+app.post('/signup', (req, res) => {
+    const { username, password } = req.body;
+    const sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+    db.query(sql, [username, password], (err, result) => {
+        if (err) return res.status(500).json({ error: "User already exists or DB error" });
+        res.json({ message: "Signup success!" });
     });
 });
 
-// 2. Kotha task database lo add cheyadaniki (CREATE)
+// 2. User Login
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    const sql = "SELECT id FROM users WHERE username = ? AND password = ?";
+    db.query(sql, [username, password], (err, results) => {
+        if (err || results.length === 0) return res.status(401).json({ error: "Invalid credentials" });
+        res.json({ userId: results[0].id, username: username });
+    });
+});
+
+// 3. Get Tasks (Only for logged-in user)
+app.get('/get-tasks/:userId', (req, res) => {
+    const { userId } = req.params;
+    const sql = "SELECT * FROM tasks WHERE user_id = ?";
+    db.query(sql, [userId], (err, results) => {
+        if (err) return res.json(err);
+        res.json(results);
+    });
+});
+
+// 4. Add Task with Reminder
 app.post('/add-task', (req, res) => {
-    const sql = "INSERT INTO tasks (task_name) VALUES (?)";
-    const values = [req.body.task];
-
-    db.query(sql, values, (err, result) => {
+    const { task, userId, reminderTime } = req.body;
+    const sql = "INSERT INTO tasks (task_name, user_id, reminder_time) VALUES (?, ?, ?)";
+    db.query(sql, [task, userId, reminderTime], (err, result) => {
         if (err) return res.json(err);
-        return res.json({ message: "Task added successfully!" });
+        res.json({ message: "Task added!" });
     });
 });
-// Task status update cheyadaniki (UPDATE)
-// Task Update with History (Time)
-app.put('/update-task/:id', (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body;
-    
-    // Task complete ayithe current time, lekapothe null
-    const completedAt = (status === 'completed') ? new Date() : null;
-
-    const sql = "UPDATE tasks SET status = ?, completed_at = ? WHERE id = ?";
-    db.query(sql, [status, completedAt, id], (err, result) => {
-        if (err) return res.json(err);
-        res.json({ message: "Updated successfully" });
-    });
-});
-
-// 3. Task delete cheyadaniki (DELETE)
+// 3. Task delete cheyadaniki (DELETE
 app.delete('/delete-task/:id', (req, res) => {
     const sql = "DELETE FROM tasks WHERE id = ?";
     const id = req.params.id;
