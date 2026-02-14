@@ -1,107 +1,109 @@
 const API_URL = "https://todo-backend-varun.onrender.com";
+let currentUserId = localStorage.getItem("userId");
+let currentUserName = localStorage.getItem("userName");
 
-// Page load avvagane tasks load cheyali
-window.onload = getTasks;
-
-async function getTasks() {
-    try {
-        const res = await fetch(`${API_URL}/get-tasks`);
-        const tasks = await res.json();
-        
-        // 1. Nee HTML lo ee IDs pakka undali mama
-        const todoList = document.getElementById('todoList');
-        const historyList = document.getElementById('historyList');
-        
-        if (!todoList || !historyList) {
-            console.error("HTML lo todoList leda historyList IDs levu mama!");
-            return;
-        }
-
-        todoList.innerHTML = '';
-        historyList.innerHTML = '';
-
-        tasks.forEach(task => {
-            const li = document.createElement('li');
-            // Backend nundi 'status' ane peru tho data ostundi
-            const isCompleted = task.status === 'completed';
-
-            li.innerHTML = `
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <input type="checkbox" ${isCompleted ? 'checked' : ''} 
-                        onclick="toggleComplete(${task.id}, '${task.status}')">
-                    <span style="${isCompleted ? 'text-decoration: line-through; color: gray;' : ''}">
-    ${task.task_name || task.task || "Unnamed Task"} 
-</span>
-                </div>
-                <div>
-                    <small style="font-size:10px; color:gray;">
-                        ${task.completed_at ? new Date(task.completed_at).toLocaleString() : ''}
-                    </small>
-                    <span class="delete-btn" onclick="deleteTask(${task.id})" style="cursor:pointer; color:red; margin-left:10px;"> X</span>
-                </div>
-            `;
-
-            // 2. Status batti list loki pampali
-            if (isCompleted) {
-                historyList.appendChild(li);
-            } else {
-                todoList.appendChild(li);
-            }
-        });
-    } catch (err) {
-        console.error("Tasks load avvatledhu:", err);
+// App open avvagane login status check cheyali
+window.onload = () => {
+    if (currentUserId) {
+        showApp();
     }
-}
+};
 
-async function toggleComplete(id, currentStatus) {
-    const newStatus = currentStatus === 'pending' ? 'completed' : 'pending';
-    
-    await fetch(`${API_URL}/update-task/${id}`, {
-        method: 'PUT',
+// 1. Signup Logic
+async function signup() {
+    const u = document.getElementById("username").value;
+    const p = document.getElementById("password").value;
+    if (!u || !p) return alert("Details poorthiga nampu mama!");
+
+    const res = await fetch(`${API_URL}/signup`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ username: u, password: p })
     });
-    getTasks(); // List refresh chey
+    const data = await res.json();
+    alert(data.message || data.error);
 }
-// Patha line: const isDone = task.status === 'completed' ? 'style="..."' : '';
-// Kotha line (Class based):
-// const completedClass = task.status === 'completed' ? 'class="completed"' : '';
 
-// li.innerHTML = `
-//     <span ${completedClass} onclick="toggleComplete(${task.id}, '${task.status}')" style="cursor:pointer">
-//         ${task.task_name}
-//     </span>
-//     <span class="delete-btn" onclick="deleteTask(${task.id})">X</span>
-// `;
-
-async function addTask() {
-    const input = document.getElementById('todoInput');
-    const taskText = input.value;
-
-    if (!taskText) return;
-
-    try {
-        const response = await fetch(`${API_URL}/add-task`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ task: taskText }) // Backend lo 'task' ani catch chestunnam
-        });
-
-        if (response.ok) {
-            input.value = '';
-            getTasks(); // List refresh cheyadaniki
-        } else {
-            console.error("Server error:", await response.text());
-        }
-    } catch (err) {
-        console.error("Network error:", err);
-        alert("Server connect avvaledu mama!");
+// 2. Login Logic
+async function login() {
+    const u = document.getElementById("username").value;
+    const p = document.getElementById("password").value;
+    
+    const res = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p })
+    });
+    const data = await res.json();
+    
+    if (data.userId) {
+        localStorage.setItem("userId", data.userId);
+        localStorage.setItem("userName", data.username);
+        currentUserId = data.userId;
+        currentUserName = data.username;
+        showApp();
+    } else {
+        alert("Thappu details kottav mama!");
     }
 }
 
-async function deleteTask(id) {
-    await fetch(`${API_URL}/delete-task/${id}`, {
-        method: 'DELETE'
+// UI ni marchadam
+function showApp() {
+    document.getElementById("auth-section").style.display = "none";
+    document.getElementById("app-section").style.display = "block";
+    document.getElementById("display-name").innerText = currentUserName;
+    getTasks();
+}
+
+// 3. Get Tasks (UserId pampali ikkada)
+async function getTasks() {
+    if (!currentUserId) return;
+    const res = await fetch(`${API_URL}/get-tasks/${currentUserId}`); // Backend route ki match avvali
+    const tasks = await res.json();
+    
+    const taskList = document.getElementById("taskList");
+    taskList.innerHTML = "";
+    
+    tasks.forEach(t => {
+        taskList.innerHTML += `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    <strong>${t.task_name}</strong> 
+                    <br><small class="text-muted">Reminder: ${t.reminder_time ? new Date(t.reminder_time).toLocaleString() : 'No reminder'}</small>
+                </span>
+                <button class="btn btn-danger btn-sm" onclick="deleteTask(${t.id})">Delete</button>
+            </li>
+        `;
     });
-    getTasks(); // Refresh list
+}
+
+// 4. Add Task
+async function addTask() {
+    const task = document.getElementById("taskInput").value;
+    const reminder = document.getElementById("reminderInput").value;
+    if (!task) return alert("Task enter chey mama!");
+
+    await fetch(`${API_URL}/add-task`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            task: task, 
+            userId: currentUserId, 
+            reminderTime: reminder || null 
+        })
+    });
+    document.getElementById("taskInput").value = "";
+    document.getElementById("reminderInput").value = "";
+    getTasks();
+}
+
+// 5. Delete Task
+async function deleteTask(id) {
+    await fetch(`${API_URL}/delete-task/${id}`, { method: 'DELETE' });
+    getTasks();
+}
+
+function logout() {
+    localStorage.clear();
+    location.reload();
 }
