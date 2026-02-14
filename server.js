@@ -81,6 +81,15 @@ app.delete('/delete-task/:id', (req, res) => {
         return res.json({ message: "Task deleted!" });
     });
 });
+// Task ni History ki pampadaniki (Complete)
+app.put('/complete-task/:id', (req, res) => {
+    const { id } = req.params;
+    const sql = "UPDATE tasks SET status = 'completed', completed_at = NOW() WHERE id = ?";
+    db.query(sql, [id], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Task moved to history!" });
+    });
+});
 
 // Port listen
 const PORT = process.env.PORT || 5000; // Ee line marchu

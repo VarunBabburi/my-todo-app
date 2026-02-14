@@ -56,44 +56,68 @@ function showApp() {
 }
 
 // 3. Get Tasks (UserId pampali ikkada)
-async function getTasks() {
-    if (!currentUserId) return;
-    const res = await fetch(`${API_URL}/get-tasks/${currentUserId}`); // Backend route ki match avvali
-    const tasks = await res.json();
-    
-    const taskList = document.getElementById("taskList");
-    taskList.innerHTML = "";
-    
-    tasks.forEach(t => {
-        taskList.innerHTML += `
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>
-                    <strong>${t.task_name}</strong> 
-                    <br><small class="text-muted">Reminder: ${t.reminder_time ? new Date(t.reminder_time).toLocaleString() : 'No reminder'}</small>
-                </span>
-                <button class="btn btn-danger btn-sm" onclick="deleteTask(${t.id})">Delete</button>
-            </li>
-        `;
-    });
-}
-
-// 4. Add Task
+// 1. Add Task (Reset fix tho)
 async function addTask() {
-    const task = document.getElementById("taskInput").value;
-    const reminder = document.getElementById("reminderInput").value;
-    if (!task) return alert("Task enter chey mama!");
+    const taskBox = document.getElementById("taskInput");
+    const reminderBox = document.getElementById("reminderInput");
+    
+    if (!taskBox.value) return alert("Task enter chey mama!");
 
     await fetch(`${API_URL}/add-task`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-            task: task, 
+            task: taskBox.value, 
             userId: currentUserId, 
-            reminderTime: reminder || null 
+            reminderTime: reminderBox.value || null 
         })
     });
-    document.getElementById("taskInput").value = ""; // Task box clear chestundi
-    document.getElementById("reminderInput").value = ""; // Date/Time box ni reset chestundi (Idhi add chey)
+
+    // Resetting inputs - Idi pakka pani chestundi
+    taskBox.value = ""; 
+    reminderBox.value = ""; 
+    getTasks();
+}
+
+// 2. Get Tasks (History filter tho)
+async function getTasks() {
+    const res = await fetch(`${API_URL}/get-tasks/${currentUserId}`);
+    const tasks = await res.json();
+    
+    const taskList = document.getElementById("taskList");
+    const historyList = document.getElementById("historyList");
+    
+    taskList.innerHTML = "";
+    historyList.innerHTML = "";
+    
+    tasks.forEach(t => {
+        const itemHtml = `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    <strong style="${t.status === 'completed' ? 'text-decoration: line-through; color: gray;' : ''}">
+                        ${t.task_name}
+                    </strong> 
+                    <br><small class="text-muted">${t.reminder_time ? new Date(t.reminder_time).toLocaleString() : ''}</small>
+                </span>
+                <div>
+                    ${t.status === 'pending' ? 
+                        `<button class="btn btn-sm btn-outline-success me-2" onclick="completeTask(${t.id})">Done ✅</button>` : ''}
+                    <button class="btn btn-danger btn-sm" onclick="deleteTask(${t.id})">Erase 🗑️</button>
+                </div>
+            </li>
+        `;
+
+        if (t.status === 'pending') {
+            taskList.innerHTML += itemHtml;
+        } else {
+            historyList.innerHTML += itemHtml;
+        }
+    });
+}
+
+// 3. Complete Task Function
+async function completeTask(id) {
+    await fetch(`${API_URL}/complete-task/${id}`, { method: 'PUT' });
     getTasks();
 }
 
