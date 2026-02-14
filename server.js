@@ -16,7 +16,8 @@ const db = mysql.createConnection({
     user: 'root',      // Nee MySQL username (usually root)
     password: 'XfTKFMFQoLkvSZKHzUbSGpiBhCIHyjXe', // Nee MySQL password ikkada ivvu
     database: 'railway',
-    port:'24969'
+    port:'24969',
+    timezone: '+05:30'
 });
 
 db.connect((err) => {

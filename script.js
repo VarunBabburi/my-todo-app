@@ -115,7 +115,7 @@ async function getTasks() {
                     <strong style="${t.status === 'completed' ? 'text-decoration: line-through; color: gray;' : ''}">
                         ${t.task_name}
                     </strong> 
-                    <br><small class="text-muted">${t.reminder_time ? new Date(t.reminder_time).toLocaleString() : ''}</small>
+                    <br><small class="text-muted">${t.reminder_time ? t.reminder_time.replace('T', ' ').substring(0, 16) : ''}</small>
                 </span>
                 <div>
                     ${t.status === 'pending' ? 
