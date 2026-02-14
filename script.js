@@ -92,8 +92,8 @@ async function addTask() {
             reminderTime: reminder || null 
         })
     });
-    document.getElementById("taskInput").value = "";
-    document.getElementById("reminderInput").value = "";
+    document.getElementById("taskInput").value = ""; // Task box clear chestundi
+    document.getElementById("reminderInput").value = ""; // Date/Time box ni reset chestundi (Idhi add chey)
     getTasks();
 }
 
