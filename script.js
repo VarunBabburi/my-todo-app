@@ -63,20 +63,27 @@ async function addTask() {
     
     if (!taskBox.value) return alert("Task enter chey mama!");
 
-    await fetch(`${API_URL}/add-task`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            task: taskBox.value, 
-            userId: currentUserId, 
-            reminderTime: reminderBox.value || null 
-        })
-    });
+    try {
+        await fetch(`${API_URL}/add-task`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                task: taskBox.value, 
+                userId: currentUserId, 
+                reminderTime: reminderBox.value || null 
+            })
+        });
 
-    // Resetting inputs - Idi pakka pani chestundi
-    taskBox.value = ""; 
-    reminderBox.value = ""; 
-    getTasks();
+        // ✅ ID lu correct ga unna variables tho reset cheyali
+        taskBox.value = ""; 
+        reminderBox.value = ""; 
+        reminderBox.defaultValue = ""; 
+        reminderBox.blur(); 
+
+        getTasks();
+    } catch (err) {
+        console.error("Task add chesetappudu error vachindi:", err);
+    }
 }
 
 // 2. Get Tasks (History filter tho)
