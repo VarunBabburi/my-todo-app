@@ -85,7 +85,14 @@ async function addTask() {
         alert("Server connection error!");
     }
 }
-
+// Browser sound block cheyakunda "Unlock" chese logic
+document.body.addEventListener('click', () => {
+    alarmSound.play().then(() => {
+        alarmSound.pause(); // Ventane pause chesthunnam, just permission kosam
+        alarmSound.currentTime = 0;
+        console.log("Sound Unlocked Mama!");
+    }).catch(e => console.log("Click tharuvatha kuda block ayyindi"));
+}, { once: true }); // Okkasari click chesthe chalu
 // 4. Get Tasks (Timezone Display Fix)
 // 2. Get Tasks (Timezone and Reset issues fixed ikkada)
 async function getTasks() {
@@ -158,8 +165,9 @@ setInterval(() => {
 // 1. Alarm Sound kosam oka variable (Inthaku mundu ekkadaina top lo pettu)
 // 1. Manchi Loud Sound okati pettuko mama
 // Manchi loud sound link idi, okkasari browser lo open chesi chudu mama sound osthundo ledo
-const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_loop.ogg");
-alarmSound.loop = true; // Alarm aagakunda moguthune untundhi
+const alarmSound = new Audio("https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3");
+alarmSound.loop = true;
+alarmSound.preload = 'auto'; // Sound ni mundhe load chesthundhi
 
 async function checkAlarms() {
     if (!currentUserId) return;
@@ -179,23 +187,23 @@ async function checkAlarms() {
             if (t.status === 'pending' && t.reminder_time) {
                 const taskTime = t.reminder_time.substring(0, 16).replace(' ', 'T');
                 
-                if (taskTime === nowStr) {
-                    // ✅ FORCE PLAY: Browser block chesina play cheyamani chepthunnam
-                    alarmSound.play().catch(error => {
-                        console.log("Browser sound block chesindi mama! Screen meeda okasari click chey.");
-                    });
+            // checkAlarms lo sound play daggara idi update chey:
+if (taskTime === nowStr) {
+    alarmSound.currentTime = 0; // Sound ni modhalu nundi start chesthundhi
+    alarmSound.play().catch(e => {
+        console.log("Play failed, but alert will work!");
+    });
 
-                    // Vibrate phone
-                    if (navigator.vibrate) navigator.vibrate([500, 300, 500]);
+    // Vibrate phone
+    if (navigator.vibrate) navigator.vibrate([500, 300, 500]);
 
-                    // Alert vachinappudu manam "OK" kotte daka sound moguthune untundi
-                    setTimeout(() => {
-                        if(confirm("⏰ ALARM: " + t.task_name + "\n\nSound aapalante OK kottu mama!")) {
-                            alarmSound.pause();
-                            alarmSound.currentTime = 0;
-                        }
-                    }, 500);
-                }
+    // Screen meedha alert vachinappudu sound moguthune untundhi
+    setTimeout(() => {
+        if(confirm("⏰ TIME AYYINDI MAMA!\nTask: " + t.task_name + "\n\nSound aapalante OK kottu.")) {
+            alarmSound.pause();
+        }
+    }, 500);
+}
             }
         });
     } catch (e) {
