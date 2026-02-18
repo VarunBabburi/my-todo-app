@@ -157,8 +157,9 @@ setInterval(() => {
 
 // 1. Alarm Sound kosam oka variable (Inthaku mundu ekkadaina top lo pettu)
 // 1. Manchi Loud Sound okati pettuko mama
-const alarmSound = new Audio("https://www.soundjay.com/buttons/sounds/beep-06.mp3"); 
-alarmSound.loop = true; // User 'OK' kotte varaku moguthune untundhi
+// Manchi loud sound link idi, okkasari browser lo open chesi chudu mama sound osthundo ledo
+const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_loop.ogg");
+alarmSound.loop = true; // Alarm aagakunda moguthune untundhi
 
 async function checkAlarms() {
     if (!currentUserId) return;
@@ -179,35 +180,25 @@ async function checkAlarms() {
                 const taskTime = t.reminder_time.substring(0, 16).replace(' ', 'T');
                 
                 if (taskTime === nowStr) {
-                    // 🔊 1. Sound & Vibration
-                    alarmSound.play();
-                    if (navigator.vibrate) {
-                        navigator.vibrate([500, 200, 500, 200, 500]); // Phone gattiga vibrate avthundi
-                    }
+                    // ✅ FORCE PLAY: Browser block chesina play cheyamani chepthunnam
+                    alarmSound.play().catch(error => {
+                        console.log("Browser sound block chesindi mama! Screen meeda okasari click chey.");
+                    });
 
-                    // 📱 2. Notification with Interaction
-                    if (Notification.permission === "granted") {
-                        const n = new Notification("MAMA TIME AYYINDI! ⏰", {
-                            body: `Task: ${t.task_name}`,
-                            icon: "https://cdn-icons-png.flaticon.com/512/906/906334.png",
-                            requireInteraction: true // User close chese daka notification screen paine untundi
-                        });
-                        
-                        n.onclick = () => {
-                            alarmSound.pause(); // Notification click chesthe sound aagipothundi
-                            window.focus();
-                        };
-                    }
-                    
-                    // 🛑 3. Modal/Alert (Idi screen ni block chesthundi, so nuvvu chudalsindhe)
-                    if(confirm("⏰ TIME AYYINDI MAMA!\nTask: " + t.task_name + "\n\nSound aapalante OK kottu.")) {
-                        alarmSound.pause();
-                        alarmSound.currentTime = 0; // Reset sound
-                    }
+                    // Vibrate phone
+                    if (navigator.vibrate) navigator.vibrate([500, 300, 500]);
+
+                    // Alert vachinappudu manam "OK" kotte daka sound moguthune untundi
+                    setTimeout(() => {
+                        if(confirm("⏰ ALARM: " + t.task_name + "\n\nSound aapalante OK kottu mama!")) {
+                            alarmSound.pause();
+                            alarmSound.currentTime = 0;
+                        }
+                    }, 500);
                 }
             }
         });
     } catch (e) {
-        console.error("Alarm error");
+        console.log("Check alarms error");
     }
 }
