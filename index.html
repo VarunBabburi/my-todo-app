@@ -2,47 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Simple Todo App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mama's Modern Todo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
-    <div id="auth-section" class="container mt-5">
-        <h2 class="text-center">Welcome Mama!</h2>
-        <div class="card p-4 shadow">
-            <input type="text" id="username" class="form-control mb-2" placeholder="User Name">
-            <input type="password" id="password" class="form-control mb-3" placeholder="Password">
-            <button onclick="login()" class="btn btn-primary w-100 mb-2">Login</button>
-            <button onclick="signup()" class="btn btn-outline-success w-100">New Account (Signup)</button>
+
+    <div id="auth-section" class="container">
+        <div class="glass-card p-4">
+            <h2 class="text-center mb-4">Welcome Mama! 🚀</h2>
+            <div class="mb-3">
+                <input type="text" id="username" class="form-control custom-input" placeholder="User Name">
+            </div>
+            <div class="mb-3">
+                <input type="password" id="password" class="form-control custom-input" placeholder="Password">
+            </div>
+            <button onclick="login()" class="btn btn-primary-custom w-100 mb-2">Login</button>
+            <button onclick="signup()" class="btn btn-outline-custom w-100">Create Account</button>
         </div>
     </div>
 
-    <div id="app-section" class="container mt-5" style="display: none;">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Hi <span id="display-name"></span>, Nee Tasks:</h2>
-            <button onclick="logout()" class="btn btn-danger btn-sm">Logout</button>
+    <div id="app-section" class="container" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4 header-glass">
+            <h3 class="m-0">Hi <span id="display-name" class="name-highlight"></span>! 👋</h3>
+            <button onclick="logout()" class="btn btn-danger-custom btn-sm">Logout</button>
         </div>
 
-        <div class="card p-3 mb-4 shadow-sm">
-        <div class="input-group">
-            <input type="text" id="taskInput" class="form-control" placeholder="New task...">
-            <input type="datetime-local" id="reminderInput" class="form-control">
-            <button class="btn btn-success" onclick="addTask()">Add Task</button>
+        <div id="alarm-container" class="alarm-box" style="display:none;">
+            <p id="alarm-msg">🚨 TIME AYYINDI MAMA!</p>
+            <button onclick="stopAlarm()" class="btn btn-light btn-sm fw-bold">STOP ALARM 🛑</button>
         </div>
-         </div>
 
-         <div id="alarm-container" style="display:none; text-align:center; background:red; color:white; padding:10px; margin:10px; border-radius:10px;">
-    <p id="alarm-msg">TIME AYYINDI MAMA!</p>
-    <button onclick="stopAlarm()" style="padding:10px; cursor:pointer; font-weight:bold;">STOP ALARM 🛑</button>
-</div>
+        <div class="task-input-card p-4 mb-4 shadow-sm">
+            <div class="row g-2">
+                <div class="col-md-5">
+                    <input type="text" id="taskInput" class="form-control" placeholder="Enti mama pani?">
+                </div>
+                <div class="col-md-4">
+                    <input type="datetime-local" id="reminderInput" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-success-custom w-100" onclick="addTask()">Add Task</button>
+                </div>
+            </div>
+        </div>
 
-        <h4>📌 Active Tasks</h4>
-        <ul id="taskList" class="list-group mb-5"></ul>
-
-        <hr>
-        <h4>✅ History (Completed)</h4>
-        <ul id="historyList" class="list-group list-group-flush"></ul>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <h5 class="section-title">📌 Active Tasks</h5>
+                <ul id="taskList" class="list-unstyled"></ul>
+            </div>
+            <div class="col-md-6">
+                <h5 class="section-title text-muted">✅ History</h5>
+                <ul id="historyList" class="list-unstyled"></ul>
+            </div>
+        </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
