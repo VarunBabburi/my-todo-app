@@ -188,19 +188,25 @@ async function checkAlarms() {
                 const taskTime = t.reminder_time.substring(0, 16).replace(' ', 'T');
                 
             // checkAlarms lo sound play daggara idi update chey:
+// checkAlarms function lopala...
 if (taskTime === nowStr) {
-    alarmSound.currentTime = 0; // Sound ni modhalu nundi start chesthundhi
-    alarmSound.play().catch(e => {
-        console.log("Play failed, but alert will work!");
-    });
+    // 1. Sound play chey
+    alarmSound.loop = true; 
+    alarmSound.currentTime = 0; 
+    alarmSound.play().catch(e => console.log("Sound play error"));
 
-    // Vibrate phone
-    if (navigator.vibrate) navigator.vibrate([500, 300, 500]);
-
-    // Screen meedha alert vachinappudu sound moguthune untundhi
+    // 2. Alert chupinchu
+    // Alert vachinappudu code akkade aagi untundhi (Pause avthundi)
+    // Nuvvu "OK" kottagane kindha lines execute avthayi
     setTimeout(() => {
-        if(confirm("⏰ TIME AYYINDI MAMA!\nTask: " + t.task_name + "\n\nSound aapalante OK kottu.")) {
-            alarmSound.pause();
+        if(confirm("⏰ ALARM MOGUTHUNDHI MAMA!\nTask: " + t.task_name + "\n\nSound aapalante OK kottu.")) {
+            
+            // ✅ AGUTHA LEDHU ANTUNNAV KADHA, IDHI VADU:
+            alarmSound.pause();        // Sound ni aapesthundhi
+            alarmSound.currentTime = 0; // Sound ni modhatiki teesukosthundhi
+            alarmSound.loop = false;    // Loop ni force ga off chesthundhi
+            
+            console.log("Alarm aagipoyindhi!");
         }
     }, 500);
 }
