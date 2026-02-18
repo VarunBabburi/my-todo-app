@@ -169,15 +169,13 @@ setInterval(() => {
 const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_loop.ogg");
 alarmSound.loop = true;
 
-// 2. Sound Permission Unlock (Idi kachithamga undali)
-document.body.addEventListener('click', () => {
-    alarmSound.play().then(() => {
-        alarmSound.pause();
-        alarmSound.currentTime = 0;
-    }).catch(e => console.log("Unlock failed"));
-}, { once: true });
+// Sound stop chese function
+function stopAlarm() {
+    alarmSound.pause();
+    alarmSound.currentTime = 0;
+    document.getElementById('alarm-container').style.display = 'none';
+}
 
-// 3. checkAlarms Function
 async function checkAlarms() {
     if (!currentUserId) return;
 
@@ -197,27 +195,25 @@ async function checkAlarms() {
                 const taskTime = t.reminder_time.substring(0, 16).replace(' ', 'T');
                 
                 if (taskTime === nowStr) {
-                    // ✅ Music Start
-                    alarmSound.currentTime = 0;
-                    alarmSound.play();
+                    // 🔊 Music Play
+                    alarmSound.play().catch(e => console.log("Click the screen first!"));
 
-                    // ✅ Vibration
-                    if (navigator.vibrate) navigator.vibrate([500, 500, 500]);
+                    // 📱 Show Red Stop Button on screen
+                    const container = document.getElementById('alarm-container');
+                    const msg = document.getElementById('alarm-msg');
+                    if(container && msg) {
+                        msg.innerText = "⏰ TIME AYYINDI: " + t.task_name;
+                        container.style.display = 'block';
+                    }
 
-                    // ✅ Message Box (Kachithamga vachela loop bayatiki tiddam or alert vadadam)
-                    // setTimeout vadithe loop break avvadhu
-                    setTimeout(() => {
-                        const stop = confirm("⏰ ALARM MOGUTHUNDHI MAMA!\nTask: " + t.task_name + "\n\nSound aapalante OK kottu.");
-                        if (stop) {
-                            alarmSound.pause();
-                            alarmSound.currentTime = 0;
-                            alarmSound.loop = false;
-                        }
-                    }, 100);
+                    // 📱 Mobile Notification
+                    if (Notification.permission === "granted") {
+                        new Notification("MAMA ALARM!", { body: t.task_name });
+                    }
                 }
             }
         });
     } catch (e) {
-        console.log("Error in checkAlarms");
+        console.log("Check error");
     }
 }
