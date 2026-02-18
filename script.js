@@ -165,10 +165,19 @@ setInterval(() => {
 // 1. Alarm Sound kosam oka variable (Inthaku mundu ekkadaina top lo pettu)
 // 1. Manchi Loud Sound okati pettuko mama
 // Manchi loud sound link idi, okkasari browser lo open chesi chudu mama sound osthundo ledo
-const alarmSound = new Audio("https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3");
+// 1. Top lo sound setup (Inthaka mundu link bagundi annavu kabatti adhe peduthunna)
+const alarmSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_loop.ogg");
 alarmSound.loop = true;
-alarmSound.preload = 'auto'; // Sound ni mundhe load chesthundhi
 
+// 2. Sound Permission Unlock (Idi kachithamga undali)
+document.body.addEventListener('click', () => {
+    alarmSound.play().then(() => {
+        alarmSound.pause();
+        alarmSound.currentTime = 0;
+    }).catch(e => console.log("Unlock failed"));
+}, { once: true });
+
+// 3. checkAlarms Function
 async function checkAlarms() {
     if (!currentUserId) return;
 
@@ -187,32 +196,28 @@ async function checkAlarms() {
             if (t.status === 'pending' && t.reminder_time) {
                 const taskTime = t.reminder_time.substring(0, 16).replace(' ', 'T');
                 
-            // checkAlarms lo sound play daggara idi update chey:
-// checkAlarms function lopala...
-if (taskTime === nowStr) {
-    // 1. Sound play chey
-    alarmSound.loop = true; 
-    alarmSound.currentTime = 0; 
-    alarmSound.play().catch(e => console.log("Sound play error"));
+                if (taskTime === nowStr) {
+                    // ✅ Music Start
+                    alarmSound.currentTime = 0;
+                    alarmSound.play();
 
-    // 2. Alert chupinchu
-    // Alert vachinappudu code akkade aagi untundhi (Pause avthundi)
-    // Nuvvu "OK" kottagane kindha lines execute avthayi
-    setTimeout(() => {
-        if(confirm("⏰ ALARM MOGUTHUNDHI MAMA!\nTask: " + t.task_name + "\n\nSound aapalante OK kottu.")) {
-            
-            // ✅ AGUTHA LEDHU ANTUNNAV KADHA, IDHI VADU:
-            alarmSound.pause();        // Sound ni aapesthundhi
-            alarmSound.currentTime = 0; // Sound ni modhatiki teesukosthundhi
-            alarmSound.loop = false;    // Loop ni force ga off chesthundhi
-            
-            console.log("Alarm aagipoyindhi!");
-        }
-    }, 500);
-}
+                    // ✅ Vibration
+                    if (navigator.vibrate) navigator.vibrate([500, 500, 500]);
+
+                    // ✅ Message Box (Kachithamga vachela loop bayatiki tiddam or alert vadadam)
+                    // setTimeout vadithe loop break avvadhu
+                    setTimeout(() => {
+                        const stop = confirm("⏰ ALARM MOGUTHUNDHI MAMA!\nTask: " + t.task_name + "\n\nSound aapalante OK kottu.");
+                        if (stop) {
+                            alarmSound.pause();
+                            alarmSound.currentTime = 0;
+                            alarmSound.loop = false;
+                        }
+                    }, 100);
+                }
             }
         });
     } catch (e) {
-        console.log("Check alarms error");
+        console.log("Error in checkAlarms");
     }
 }
