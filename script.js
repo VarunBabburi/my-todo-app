@@ -17,7 +17,7 @@ window.onload = () => {
 async function signup() {
     const u = document.getElementById("username").value;
     const p = document.getElementById("password").value;
-    if (!u || !p) return alert("Details poorthiga nampu mama!");
+    if (!u || !p) return alert("Details poorthiga nimpu mama!");
 
     const res = await fetch(`${API_URL}/signup`, {
         method: 'POST',
@@ -156,49 +156,58 @@ setInterval(() => {
 }, 60000);
 
 // 1. Alarm Sound kosam oka variable (Inthaku mundu ekkadaina top lo pettu)
-const alarmSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+// 1. Manchi Loud Sound okati pettuko mama
+const alarmSound = new Audio("https://www.soundjay.com/buttons/sounds/beep-06.mp3"); 
+alarmSound.loop = true; // User 'OK' kotte varaku moguthune untundhi
 
 async function checkAlarms() {
     if (!currentUserId) return;
 
-    const res = await fetch(`${API_URL}/get-tasks/${currentUserId}`);
-    const tasks = await res.json();
-    
-    const now = new Date();
+    try {
+        const res = await fetch(`${API_URL}/get-tasks/${currentUserId}`);
+        const tasks = await res.json();
+        
+        const now = new Date();
+        const nowStr = now.getFullYear() + "-" + 
+                       String(now.getMonth() + 1).padStart(2, '0') + "-" + 
+                       String(now.getDate()).padStart(2, '0') + "T" + 
+                       String(now.getHours()).padStart(2, '0') + ":" + 
+                       String(now.getMinutes()).padStart(2, '0');
 
-    const nowStr = now.getFullYear() + "-" + 
-                   String(now.getMonth() + 1).padStart(2, '0') + "-" + 
-                   String(now.getDate()).padStart(2, '0') + "T" + 
-                   String(now.getHours()).padStart(2, '0') + ":" + 
-                   String(now.getMinutes()).padStart(2, '0');
-
-    tasks.forEach(t => {
-        if (t.status === 'pending' && t.reminder_time) {
-            
-            const taskTime = t.reminder_time.substring(0, 16).replace(' ', 'T');
-            
-            if (taskTime === nowStr) {
-                // ✅ 1. Sound Play cheyadam
-                alarmSound.play().catch(e => console.log("Sound play avvaledu, click chey mama screen meeda!"));
-
-                // ✅ 2. Top Notification Popup
-                if (Notification.permission === "granted") {
-                    const notif = new Notification("Todo Alarm! 🔔", {
-                        body: `Mama, Time ayyindi: ${t.task_name}`,
-                        icon: "https://cdn-icons-png.flaticon.com/512/906/906334.png",
-                        requireInteraction: true // User close chese daka notification untundi
-                    });
-
-                    // Notification click chesthe app ki vellela
-                    notif.onclick = () => {
-                        window.focus();
-                        alarmSound.pause(); // Sound aapestundi
-                    };
-                }
+        tasks.forEach(t => {
+            if (t.status === 'pending' && t.reminder_time) {
+                const taskTime = t.reminder_time.substring(0, 16).replace(' ', 'T');
                 
-                // Backup Alert (Notification missed aithe idi help avtundi)
-                alert("⏰ ALARM: " + t.task_name);
+                if (taskTime === nowStr) {
+                    // 🔊 1. Sound & Vibration
+                    alarmSound.play();
+                    if (navigator.vibrate) {
+                        navigator.vibrate([500, 200, 500, 200, 500]); // Phone gattiga vibrate avthundi
+                    }
+
+                    // 📱 2. Notification with Interaction
+                    if (Notification.permission === "granted") {
+                        const n = new Notification("MAMA TIME AYYINDI! ⏰", {
+                            body: `Task: ${t.task_name}`,
+                            icon: "https://cdn-icons-png.flaticon.com/512/906/906334.png",
+                            requireInteraction: true // User close chese daka notification screen paine untundi
+                        });
+                        
+                        n.onclick = () => {
+                            alarmSound.pause(); // Notification click chesthe sound aagipothundi
+                            window.focus();
+                        };
+                    }
+                    
+                    // 🛑 3. Modal/Alert (Idi screen ni block chesthundi, so nuvvu chudalsindhe)
+                    if(confirm("⏰ TIME AYYINDI MAMA!\nTask: " + t.task_name + "\n\nSound aapalante OK kottu.")) {
+                        alarmSound.pause();
+                        alarmSound.currentTime = 0; // Reset sound
+                    }
+                }
             }
-        }
-    });
+        });
+    } catch (e) {
+        console.error("Alarm error");
+    }
 }
