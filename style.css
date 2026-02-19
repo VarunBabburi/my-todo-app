@@ -143,3 +143,21 @@ li:hover {
 body {
     background: var(--bg-gradient);
 }
+.app-footer {
+    text-align: center;
+    padding: 20px;
+    color: rgba(255, 255, 255, 0.7); /* Light white color */
+    width: 100%;
+    margin-top: 30px;
+    font-size: 0.9rem;
+}
+
+.app-footer strong {
+    color: #00d2ff; /* Nee peru highlight avvadaniki sky blue color */
+    letter-spacing: 1px;
+}
+
+/* Light mode lo text dark ga kanipinchali kadha */
+[data-theme="light"] .app-footer {
+    color: #2d3436;
+}
