@@ -250,7 +250,7 @@ async function sendFeedback() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
     userId: currentUserId, 
-    username: localStorage.getItem('userName'), // N capital undali ikkada!
+    username: localStorage.getItem('username'), // N capital undali ikkada!
     message: feedback 
 })
         });
