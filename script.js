@@ -249,10 +249,10 @@ async function sendFeedback() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-                userId: currentUserId, 
-                username: localStorage.getItem('username'), 
-                message: feedback 
-            })
+    userId: currentUserId, 
+    username: localStorage.getItem('userName'), // N capital undali ikkada!
+    message: feedback 
+})
         });
 
         if (res.ok) {

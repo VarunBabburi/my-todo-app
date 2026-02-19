@@ -94,24 +94,25 @@ app.put('/complete-task/:id', (req, res) => {
     });
 });
 // --- FEEDBACK ROUTE ---
-app.post('/add-feedback', async (req, res) => {
+// --- FEEDBACK ROUTE (MySQL Fix for Railway) ---
+app.post('/add-feedback', (req, res) => {
     const { userId, username, message } = req.body;
     
     if (!message) {
         return res.status(400).json({ error: "Message is required mama!" });
     }
 
-    try {
-        const query = "INSERT INTO feedbacks (user_id, username, message) VALUES ($1, $2, $3) RETURNING *";
-        const values = [userId, username, message];
-        const result = await pool.query(query, values);
+    // MySQL syntax lo '?' vaadali
+    const sql = "INSERT INTO feedbacks (user_id, username, message) VALUES (?, ?, ?)";
+    db.query(sql, [userId, username, message], (err, result) => {
+        if (err) {
+            console.error("Feedback error:", err);
+            return res.status(500).json({ error: "DB Error: Table create chesava mama?" });
+        }
         
         console.log(`Feedback received from ${username}`);
-        res.status(200).json({ success: true, data: result.rows[0] });
-    } catch (err) {
-        console.error("Feedback error:", err.message);
-        res.status(500).json({ error: "Server error mama!" });
-    }
+        res.status(200).json({ success: true, message: "Feedback saved!" });
+    });
 });
 
 // --- FEEDBACKS CHUDADANIKI (Optional for you) ---
