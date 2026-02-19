@@ -30,8 +30,18 @@
             <div class="d-flex gap-2">
     <button onclick="toggleTheme()" class="btn btn-outline-light btn-sm">🌓</button>
     <button onclick="logout()" class="btn btn-danger-custom btn-sm">Logout</button>
+         <button onclick="openFeedback()" class="btn btn-outline-light btn-sm">💬 Feedback</button>
 </div>
         </div>
+
+<div id="feedback-modal" class="glass-card p-4" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:1000; width:90%; max-width:400px;">
+    <h4 class="text-center">Mama, App Ela Undhi?</h4>
+    <textarea id="feedbackText" class="form-control mb-3" rows="4" placeholder="Nee feedback ikkada kottu mama..."></textarea>
+    <div class="d-flex gap-2">
+        <button onclick="sendFeedback()" class="btn btn-primary-custom w-100">Send 🚀</button>
+        <button onclick="closeFeedback()" class="btn btn-danger-custom w-100">Close</button>
+    </div>
+</div>
 
         <div id="alarm-container" class="alarm-box" style="display:none;">
             <p id="alarm-msg">🚨 TIME AYYINDI MAMA!</p>

@@ -93,6 +93,36 @@ app.put('/complete-task/:id', (req, res) => {
         res.json({ message: "Task moved to history!" });
     });
 });
+// --- FEEDBACK ROUTE ---
+app.post('/add-feedback', async (req, res) => {
+    const { userId, username, message } = req.body;
+    
+    if (!message) {
+        return res.status(400).json({ error: "Message is required mama!" });
+    }
+
+    try {
+        const query = "INSERT INTO feedbacks (user_id, username, message) VALUES ($1, $2, $3) RETURNING *";
+        const values = [userId, username, message];
+        const result = await pool.query(query, values);
+        
+        console.log(`Feedback received from ${username}`);
+        res.status(200).json({ success: true, data: result.rows[0] });
+    } catch (err) {
+        console.error("Feedback error:", err.message);
+        res.status(500).json({ error: "Server error mama!" });
+    }
+});
+
+// --- FEEDBACKS CHUDADANIKI (Optional for you) ---
+app.get('/get-feedbacks', async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM feedbacks ORDER BY created_at DESC");
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
 
 // Port listen
 const PORT = process.env.PORT || 5000; // Ee line marchu

@@ -230,3 +230,37 @@ async function checkAlarms() {
         console.log("Check error");
     }
 }
+// Modal open/close functions
+function openFeedback() {
+    document.getElementById('feedback-modal').style.display = 'block';
+}
+
+function closeFeedback() {
+    document.getElementById('feedback-modal').style.display = 'none';
+}
+
+// Feedback send chese function
+async function sendFeedback() {
+    const feedback = document.getElementById('feedbackText').value;
+    if (!feedback) return alert("Emaina raayi mama!");
+
+    try {
+        const res = await fetch(`${API_URL}/add-feedback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                userId: currentUserId, 
+                username: localStorage.getItem('username'), 
+                message: feedback 
+            })
+        });
+
+        if (res.ok) {
+            alert("Thanks mama! Nee feedback andhindhi. ❤️");
+            document.getElementById('feedbackText').value = '';
+            closeFeedback();
+        }
+    } catch (e) {
+        alert("Feedback pampadam lo error vachindi mama.");
+    }
+}
