@@ -2,6 +2,19 @@ const API_URL = "https://todo-backend-varun.onrender.com";
 let currentUserId = localStorage.getItem("userId");
 let currentUserName = localStorage.getItem("userName");
 
+// 1. Theme Switcher Logic
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', newTheme);
+}
+
+// 2. PWA Service Worker Register (Install option kosam)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.log(err));
+    });
+}
 // 1. App open avvagane initialization
 window.onload = () => {
     if (currentUserId) {

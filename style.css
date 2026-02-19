@@ -1,11 +1,35 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap');
 
-body {
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+/* body {  
+    background: linear-gradient(135deg, #0f0c29,#302b63, #24243e);
     font-family: 'Outfit', sans-serif;
     color: #fff;
     min-height: 100vh;
     padding-top: 50px;
+} */
+/* Dark Mode (Default) - White text */
+body {
+    color: #ffffff; 
+    min-height: 100vh;
+    padding-top: 50px;
+}
+
+/* Light Mode - Font ni dark grey/black ki marchali */
+[data-theme="light"] body {
+    color: #2d3436; /* Dark color for light background */
+}
+
+[data-theme="light"] .section-title, 
+[data-theme="light"] h3, 
+[data-theme="light"] h5,
+[data-theme="light"] #display-name {
+    color: #2d3436 !important;
+}
+
+/* Task cards lo unna 'Set for' text kuda light mode lo dark ga undali */
+[data-theme="light"] li small, 
+[data-theme="light"] .text-muted {
+    color: #636e72 !important;
 }
 
 .glass-card {
@@ -16,8 +40,7 @@ body {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     max-width: 400px;
     margin: auto;
-}
-
+} 
 .task-input-card {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 15px;
@@ -26,10 +49,18 @@ body {
 
 .btn-primary-custom {
     background: #6a11cb;
+    color: #ffffff !important;
     border: none;
     padding: 10px;
     border-radius: 10px;
     transition: 0.3s;
+}
+.btn-outline-custom {
+    /* border: 1px solid rgba(255, 255, 255, 0.5); */
+    color: #ffffff !important; /* White text */
+    background: transparent;
+    padding: 10px;
+    border-radius: 10px;
 }
 
 .btn-primary-custom:hover {
@@ -38,7 +69,7 @@ body {
 }
 
 .section-title {
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 2px solid rgb(74, 70, 70);
     padding-bottom: 10px;
     margin-bottom: 20px;
 }
@@ -72,4 +103,43 @@ li:hover {
     0% { transform: translate(1px, 1px) rotate(0deg); }
     20% { transform: translate(-3px, 0px) rotate(1deg); }
     100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+/* Date text and labels white cheyadaniki */
+.section-title, label, .text-muted, #display-name {
+    color: #ffffff !important;
+}
+
+/* History section lo unna text kuda white */
+#historyList li {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Add Task and Logout buttons customization */
+.btn-success-custom {
+    background: #28a745;
+    color: white !important;
+    border: none;
+    font-weight: 600;
+}
+
+.btn-danger-custom {
+    background: #dc3545;
+    color: white !important;
+    border: none;
+}
+
+/* --- THEME COLORS (New) --- */
+:root {
+    --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    --card-bg: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] {
+    --bg-gradient: linear-gradient(135deg, #e0eafc, #cfdef3);
+    --card-bg: rgba(0, 0, 0, 0.05);
+}
+
+body {
+    background: var(--bg-gradient);
 }
