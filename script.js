@@ -241,26 +241,34 @@ function closeFeedback() {
 
 // Feedback send chese function
 async function sendFeedback() {
-    const feedback = document.getElementById('feedbackText').value;
+    const feedbackField = document.getElementById('feedbackText');
+    const feedback = feedbackField.value;
+    
     if (!feedback) return alert("Emaina raayi mama!");
+
+    // Login ayinappudu manam 'userName' (N capital) vaadam
+    const loggedInUser = localStorage.getItem("userName"); 
+    const loggedInId = localStorage.getItem("userId");
+
+    if (!loggedInId) return alert("Login ayyi undali mama!");
 
     try {
         const res = await fetch(`${API_URL}/add-feedback`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-    userId: currentUserId, 
-    username: localStorage.getItem('username'), // N capital undali ikkada!
-    message: feedback 
-})
+                userId: loggedInId, 
+                username: loggedInUser || 'Guest User', // Null unte Guest ani velthundhi
+                message: feedback 
+            })
         });
 
         if (res.ok) {
             alert("Thanks mama! Nee feedback andhindhi. ❤️");
-            document.getElementById('feedbackText').value = '';
+            feedbackField.value = '';
             closeFeedback();
         }
     } catch (e) {
-        alert("Feedback pampadam lo error vachindi mama.");
+        alert("Error: Server connection problem mama.");
     }
 }
